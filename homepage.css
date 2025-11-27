@@ -1,0 +1,232 @@
+/* RESET */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+/* ==============================
+   VARIÁVEIS DE TEMA (AZUL)
+================================ */
+:root {
+    --bg-overlay: rgba(5,11,20,.9);
+    --bg-card: rgba(10,22,40,.6);
+    --neon-primary: #00F0FF;
+    --neon-secondary: #00A3FF;
+    --text-main: #E6F4FF;
+    --button-text: #050B14;
+}
+
+/* ==============================
+   TEMA VERMELHO / PRETO
+================================ */
+body.red-theme {
+    --bg-overlay: rgba(15,0,0,.92);
+    --bg-card: rgba(40,5,5,.75);
+    --neon-primary: #FF2A2A;
+    --neon-secondary: #B30000;
+    --text-main: #FFDADA;
+}
+
+/* ==============================
+   BODY
+================================ */
+body {
+    min-height: 100vh;
+    color: var(--text-main);
+    background:
+        linear-gradient(var(--bg-overlay), var(--bg-overlay)),
+        url("cassino.jpg") center/cover fixed;
+}
+
+/* ==============================
+   HEADER
+================================ */
+.top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 40px;
+    background: rgba(0,0,0,.6);
+    backdrop-filter: blur(10px);
+}
+
+.top-bar h1 {
+    color: var(--neon-primary);
+    text-shadow: 0 0 12px var(--neon-secondary);
+}
+
+.saldo-box {
+    font-size: 18px;
+    font-weight: bold;
+    color: var(--neon-primary);
+}
+
+.btn-secondary {
+    padding: 14px 32px;
+    border-radius: 30px;
+    border: 2px solid var(--neon-primary);
+    background: transparent;
+    color: var(--text-main);
+    cursor: pointer;
+}
+
+/* ==============================
+   HERO
+================================ */
+.hero {
+    display: flex;
+    justify-content: center;
+    padding: 60px 10%;
+    text-align: center;
+}
+
+.tag {
+    color: var(--neon-secondary);
+    letter-spacing: 3px;
+    font-size: 14px;
+}
+
+/* ==============================
+   DEPÓSITO
+================================ */
+.deposito {
+    text-align: center;
+    margin: 40px 0;
+}
+
+.deposito-box {
+    margin-top: 15px;
+}
+
+.deposito-box input {
+    padding: 12px;
+    width: 180px;
+    border-radius: 20px;
+    border: none;
+    outline: none;
+}
+
+/* ==============================
+   BOTÕES
+================================ */
+.btn-neon {
+    padding: 12px 26px;
+    border-radius: 30px;
+    border: none;
+    background: linear-gradient(
+        135deg,
+        var(--neon-secondary),
+        var(--neon-primary)
+    );
+    color: var(--button-text);
+    cursor: pointer;
+    box-shadow: 0 0 25px var(--neon-primary);
+    font-weight: bold;
+}
+
+.btn-outline {
+    padding: 12px 26px;
+    border-radius: 30px;
+    border: 2px solid var(--neon-primary);
+    background: transparent;
+    color: var(--neon-primary);
+    cursor: pointer;
+}
+
+/* ==============================
+   JOGOS
+================================ */
+.games {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    padding-bottom: 100px;
+}
+
+.game-card {
+    background: var(--bg-card);
+    padding: 30px;
+    width: 220px;
+    text-align: center;
+    border-radius: 25px;
+    box-shadow: 0 0 20px rgba(0,240,255,.3);
+}
+
+.game-card h4 {
+    margin-bottom: 10px;
+}
+
+.game-card button {
+    margin-top: 15px;
+    padding: 10px 24px;
+    border-radius: 20px;
+    border: none;
+    cursor: pointer;
+}
+
+.highlight {
+    box-shadow: 0 0 40px var(--neon-primary);
+}
+
+/* ==============================
+   MODAL / ROLETA
+================================ */
+.modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.92);
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+}
+
+.modal-content {
+    background: var(--bg-card);
+    padding: 40px;
+    border-radius: 30px;
+    text-align: center;
+    box-shadow: 0 0 40px var(--neon-primary);
+}
+
+.roleta {
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    background: radial-gradient(
+        circle,
+        var(--neon-primary),
+        var(--neon-secondary)
+    );
+    margin: 25px auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: bold;
+    color: #000;
+}
+
+/* ==============================
+   BOTÃO TROCA DE TEMA
+================================ */
+.theme-toggle {
+    position: fixed;
+    bottom: 25px;
+    right: 25px;
+    background: linear-gradient(
+        135deg,
+        var(--neon-secondary),
+        var(--neon-primary)
+    );
+    color: #000;
+    border: none;
+    padding: 14px 18px;
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 0 25px var(--neon-primary);
+    font-size: 18px;
+    z-index: 1000;
+}

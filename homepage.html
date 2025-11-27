@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title> TechBet | Home</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="homepage.css">
+</head>
+<body>
+
+<header class="top-bar">
+    <h1>🎲 TechBet</h1>
+
+    <div class="saldo-box">
+        Saldo: R$ <span id="saldo">0.00</span>
+    </div>
+
+    <button class="btn-secondary" onclick="window.location.href='telacassino.html'">Sair</button>
+
+</header>
+
+<section class="hero">
+    <div class="hero-text">
+        <span class="tag">ESCOLHA SEU JOGO</span>
+        <h2>Jogos Disponíveis</h2>
+        <p>Aposte com responsabilidade e aproveite seus bônus.</p>
+    </div>
+</section>
+
+<section class="deposito">
+    <h3>💳 Depositar Saldo</h3>
+    <div class="deposito-box">
+        <input type="number" id="valorDeposito" placeholder="Valor em R$" min="1">
+        <button class="btn-neon" onclick="depositar()">Depositar</button>
+    </div>
+</section>
+
+<section class="games">
+    <div class="game-card">
+        <h4>🎰 Slot Neon</h4>
+        <p>Aposta: R$10</p>
+        <button onclick="window.location.href='SlotNeon.html'">Jogar</button>
+    </div>
+
+    <div class="game-card highlight">
+        <h4>🃏 Blackjack</h4>
+        <p>Aposta: R$20</p>
+        <button onclick="jogar(20)">Jogar</button>
+    </div>
+
+    <div class="game-card">
+        <h4>🎡 Roleta Azul</h4>
+        <p>Aposta: R$15</p>
+        <button onclick="abrirRoleta()">Jogar</button>
+    </div>
+</section>
+
+<!-- MODAL ROLETA -->
+<div id="roletaModal" class="modal">
+    <div class="modal-content">
+        <h2>🎡 Roleta Azul</h2>
+
+        <div class="roleta">
+            <div id="resultadoRoleta">?</div>
+        </div>
+
+        <p>Aposta fixa: <strong>R$ 15,00</strong></p>
+
+        <button class="btn-neon" onclick="girarRoleta()">GIRAR</button>
+        <button class="btn-outline" onclick="fecharRoleta()">Fechar</button>
+    </div>
+</div>
+
+<script>
+    let saldo = 0;
+
+    function atualizarSaldo() {
+        document.getElementById("saldo").innerText = saldo.toFixed(2);
+    }
+
+    function depositar() {
+        const valor = Number(document.getElementById("valorDeposito").value);
+        if (valor <= 0) return alert("Digite um valor válido");
+        saldo += valor;
+        atualizarSaldo();
+        document.getElementById("valorDeposito").value = "";
+    }
+
+    function jogar(aposta) {
+        if (saldo < aposta) return alert("Saldo insuficiente!");
+        saldo -= aposta;
+
+        const ganhou = Math.random() < 0.5;
+        if (ganhou) {
+            saldo += aposta * 2;
+            alert("🎉 Você ganhou!");
+        } else {
+            alert("❌ Você perdeu!");
+        }
+        atualizarSaldo();
+    }
+
+    const apostaRoleta = 15;
+    const resultados = [
+        { texto: "❌ PERDEU", premio: 0 },
+        { texto: "💰 GANHOU 2x", premio: 2 },
+        { texto: "💰 GANHOU 2x", premio: 2 },
+        { texto: "🔥 JACKPOT 5x", premio: 5 }
+    ];
+
+    function abrirRoleta() {
+        document.getElementById("roletaModal").style.display = "flex";
+        document.getElementById("resultadoRoleta").innerText = "?";
+    }
+
+    function fecharRoleta() {
+        document.getElementById("roletaModal").style.display = "none";
+    }
+
+    function girarRoleta() {
+        if (saldo < apostaRoleta) return alert("Saldo insuficiente!");
+
+        saldo -= apostaRoleta;
+        const r = resultados[Math.floor(Math.random() * resultados.length)];
+        document.getElementById("resultadoRoleta").innerText = r.texto;
+
+        if (r.premio > 0) saldo += apostaRoleta * r.premio;
+        atualizarSaldo();
+    }
+</script>
+
+</body>
+</html>
