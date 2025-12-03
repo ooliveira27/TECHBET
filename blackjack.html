@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Blackjack - Casino Neon (Demo)</title>
+  <style>
+    :root{--bg:#0b0f1a;--card:#fff;--muted:#9aa2b2;--accent:#00ff9c;--danger:#ff4d4d}
+    *{box-sizing:border-box;font-family:Inter,system-ui,Segoe UI,Roboto,Arial}
+    body{margin:0;background:linear-gradient(180deg,#071021 0%,#071628 60%);color:#e8eef8;display:flex;align-items:center;justify-content:center;height:100vh}
+    .table{width:940px;max-width:94%;background:rgba(255,255,255,0.03);padding:22px;border-radius:14px;box-shadow:0 8px 30px rgba(0,0,0,0.6)}
+    header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+    header h1{font-size:20px;margin:0}
+    .controls{display:flex;gap:10px;align-items:center}
+    .btn{background:transparent;color:var(--accent);border:1px solid rgba(0,255,156,0.12);padding:8px 12px;border-radius:8px;cursor:pointer}
+    .btn.primary{background:var(--accent);color:#022; border:0}
+    .status{font-size:14px;color:var(--muted)}
+
+    .board{display:grid;grid-template-columns:1fr 300px;gap:18px}
+    .play-area{min-height:320px;padding:18px;border-radius:12px;background:linear-gradient(180deg,rgba(0,0,0,0.12),rgba(255,255,255,0.02));}
+    .hand{margin-bottom:18px}
+    .hand h3{margin:0 0 8px 0;font-weight:600}
+    .cards{display:flex;gap:10px}
+    .card{width:72px;height:100px;border-radius:8px;background:var(--card);color:#111;display:flex;flex-direction:column;justify-content:space-between;padding:8px;font-weight:700;box-shadow:0 4px 12px rgba(0,0,0,0.4);}
+    .card.red{color:#b91c1c}
+    .card.small{width:58px;height:80px;padding:6px}
+    .controls-vertical{display:flex;flex-direction:column;gap:8px}
+
+    .sidebar{padding:18px;border-radius:12px;background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(0,0,0,0.08));display:flex;flex-direction:column;gap:10px}
+    label{font-size:13px;color:var(--muted)}
+    input[type=number]{width:100%;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:inherit}
+    .big{font-size:18px}
+    .msg{min-height:36px;padding:8px;border-radius:8px;background:rgba(255,255,255,0.02);font-weight:600}
+
+    footer{margin-top:12px;text-align:center;font-size:13px;color:var(--muted)}
+
+    @media (max-width:800px){.board{grid-template-columns:1fr} .sidebar{order:2}}
+  </style>
+</head>
+<body>
+  <div class="table">
+    <header>
+      <h1>🎲 Blackjack - Demo</h1>
+      <div class="controls">
+        <div class="status">Saldo: <strong id="balance">1000</strong> <span class="status">créditos</span></div>
+        <button onclick="window.location.href='homepage.html'">Voltar</button>
+      </div>
+    </header>
+
+    <div class="board">
+      <section class="play-area">
+        <div class="hand" id="dealerArea">
+          <h3>Dealer <span id="dealerValue" style="font-weight:500;color:var(--muted);font-size:14px">(valor)</span></h3>
+          <div class="cards" id="dealerCards"></div>
+        </div>
+
+        <div class="hand" id="playerArea">
+          <h3>Jogador <span id="playerValue" style="font-weight:500;color:var(--muted);font-size:14px">(valor)</span></h3>
+          <div class="cards" id="playerCards"></div>
+        </div>
+
+        <div style="display:flex;gap:10px;align-items:center;margin-top:6px">
+          <button class="btn primary" id="hitBtn">Pedir (Hit)</button>
+          <button class="btn" id="standBtn">Parar (Stand)</button>
+          <button class="btn" id="doubleBtn">Dobrar (Double)</button>
+          <button class="btn" id="splitBtn" disabled>Split (não implementado)</button>
+        </div>
+
+      </section>
+
+      <aside class="sidebar">
+        <div>
+          <label>Valor da aposta</label>
+          <input type="number" id="betInput" min="1" value="50">
+        </div>
+
+        <div>
+          <label>Mensagens / Resultado</label>
+          <div class="msg" id="message">Clique em "Nova Rodada" para jogar.</div>
+        </div>
+
+        <div>
+          <label>Status do jogo</label>
+          <div class="msg" id="roundStatus">Aguardando</div>
+        </div>
+
+        <div style="display:flex;gap:8px">
+          <button class="btn primary" id="newRoundBtn">Nova Rodada</button>
+          <button class="btn" id="collectBtn">Coletar</button>
+        </div>
+
+        <div style="margin-top:6px;font-size:13px;color:var(--muted)">Regras rápidas: dealer para em 17. Ases valem 1 ou 11. Blackjack paga 3:2.</div>
+      </aside>
+    </div>
+
+    <footer>Feito como demo educacional — sem conexão real de apostas.</footer>
+  </div>
+
+<script>
+// --- Lógica do jogo ---
+let deck = [];
+let player = [];
+let dealer = [];
+let inRound = false;
+let balance = 1000;
+let currentBet = 0;
+let doubled = false;
+
+const balanceEl = document.getElementById('balance');
+const dealerCardsEl = document.getElementById('dealerCards');
+const playerCardsEl = document.getElementById('playerCards');
+const messageEl = document.getElementById('message');
+const roundStatusEl = document.getElementById('roundStatus');
+const playerValueEl = document.getElementById('playerValue');
+const dealerValueEl = document.getElementById('dealerValue');
+
+const newRoundBtn = document.getElementById('newRoundBtn');
+const hitBtn = document.getElementById('hitBtn');
+const standBtn = document.getElementById('standBtn');
+const doubleBtn = document.getElementById('doubleBtn');
+const resetBtn = document.getElementById('resetBtn');
+const collectBtn = document.getElementById('collectBtn');
+
+function createDeck(){
+  const suits = ['♠','♥','♦','♣'];
+  const ranks = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
+  const d = [];
+  for(const s of suits){
+    for(const r of ranks){
+      d.push({suit:s,rank:r});
+    }
+  }
+  return d;
+}
+
+function shuffle(a){
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+}
+
+function startRound(){
+  const bet = Number(document.getElementById('betInput').value) || 0;
+  if(bet <=0) return alert('Aposte um valor válido.');
+  if(bet > balance) return alert('Saldo insuficiente.');
+
+  currentBet = bet;
+  balance -= bet;
+  updateBalance();
+
+  deck = createDeck();
+  shuffle(deck);
+  player = [];
+  dealer = [];
+  inRound = true;
+  doubled = false;
+
+  // distribuir inicial: P D P D
+  player.push(drawCard());
+  dealer.push(drawCard());
+  player.push(drawCard());
+  dealer.push(drawCard());
+
+  render();
+
+  // Verificar blackjack
+  const pv = handValue(player);
+  const dv = handValue(dealer);
+  if(pv === 21 || dv === 21){
+    // revela e decide
+    revealDealer();
+    settleImmediate();
+  } else {
+    messageEl.textContent = 'Sua vez. Escolha: Pedir, Parar, ou Dobrar.';
+    roundStatusEl.textContent = 'Em andamento';
+  }
+}
+
+function drawCard(){
+  if(deck.length ===0){
+    deck = createDeck(); shuffle(deck);
+  }
+  return deck.pop();
+}
+
+function cardElement(card,hidden=false){
+  const div = document.createElement('div');
+  div.className = 'card' + (hidden? ' small' : '');
+  if(hidden){
+    div.style.background = 'linear-gradient(180deg,#18202b,#0b1220)';
+    div.style.color = '#fff';
+    div.textContent = '?';
+    return div;
+  }
+  const red = (card.suit === '♥' || card.suit === '♦');
+  if(red) div.classList.add('red');
+  div.innerHTML = `<div>${card.rank}</div><div style="text-align:right">${card.suit}</div>`;
+  return div;
+}
+
+function render(){
+  // limpar
+  dealerCardsEl.innerHTML = '';
+  playerCardsEl.innerHTML = '';
+
+  // mostrar dealer: primeira carta visível, segunda oculta (enquanto emRound)
+  if(inRound){
+    dealerCardsEl.appendChild(cardElement(dealer[0]));
+    dealerCardsEl.appendChild(cardElement({}, true));
+    dealerValueEl.textContent = '(?)';
+  } else {
+    for(const c of dealer) dealerCardsEl.appendChild(cardElement(c));
+    dealerValueEl.textContent = '('+handValue(dealer)+')';
+  }
+
+  for(const c of player) playerCardsEl.appendChild(cardElement(c));
+  playerValueEl.textContent = '('+handValue(player)+')';
+
+  // habilitar/desabilitar botões
+  hitBtn.disabled = !inRound;
+  standBtn.disabled = !inRound;
+  doubleBtn.disabled = !(inRound && player.length===2 && balance>=currentBet);
+}
+
+function handValue(hand){
+  // soma considerando ases flexíveis
+  let total = 0;
+  let aces = 0;
+  for(const c of hand){
+    const r = c.rank;
+    if(r === 'A'){ total += 11; aces++; }
+    else if(['J','Q','K'].includes(r)) total += 10;
+    else total += Number(r);
+  }
+  while(total>21 && aces>0){ total -=10; aces--; }
+  return total;
+}
+
+function playerHit(){
+  if(!inRound) return;
+  player.push(drawCard());
+  render();
+  const v = handValue(player);
+  if(v>21){
+    revealDealer();
+    settle();
+  }
+}
+
+function playerDouble(){
+  if(!inRound) return;
+  if(player.length !== 2) return;
+  if(balance < currentBet) return alert('Saldo insuficiente para dobrar.');
+  // dobrar aposta: tira só mais uma carta e para
+  balance -= currentBet;
+  currentBet *= 2;
+  updateBalance();
+  doubled = true;
+  player.push(drawCard());
+  render();
+  if
